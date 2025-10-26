@@ -7,7 +7,7 @@ import time # アクセス間隔を設けるために利用
 BASE_URL = "https://note.com/api/v3/searches"
 LIMIT_PER_PAGE = 20 # 1回のリクエストで取得する記事数
 MAX_NOTES = 100     # 最大取得記事数 (ポートフォリオとしては100件程度で十分)
-DELAY_SECONDS = 1   # リクエスト間の遅延時間 (サーバーへの負荷軽減のため)
+DELAY_SECONDS = 5   # リクエスト間の遅延時間 (サーバーへの負荷軽減のため)
 
 def fetch_note_articles(keyword, max_notes=MAX_NOTES):
     """
@@ -29,10 +29,27 @@ def fetch_note_articles(keyword, max_notes=MAX_NOTES):
             "size": LIMIT_PER_PAGE,
             "start": start_offset
         }
+        # 可能な限り多くの情報を含め、ブラウザに見せかける
+        headers = {
+            # 必須：ユーザーエージェント
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.199 Safari/537.36",
+    
+            # 追加：リファラ（どこから来たか）
+           "Referer": "https://note.com/",
+    
+            # 追加：通信形式の指定
+            "Accept": "application/json, text/plain, */*",
+    
+            # 追加：文字コード
+            "Accept-Encoding": "gzip, deflate, br",
+    
+            # 追加：言語
+            "Accept-Language": "ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7",
+        }
 
         try:
             # 2. APIにリクエストを送信
-            response = requests.get(BASE_URL, params=params)
+            response = requests.get(BASE_URL, params=params, headers=headers)
             
             # 3. ステータスコードをチェック (200以外はエラー処理へ)
             if response.status_code != 200:
